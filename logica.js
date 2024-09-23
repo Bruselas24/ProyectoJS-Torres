@@ -14,7 +14,7 @@ class Pedido {
       (this.telefono = pedido.telefono),
       (this.pedido = pedido.pedido),
       (this.id = Pedido.id++);
-      //cada vez que se crea un pedido automaticamente aumenta el id y se guarda en el localStorage
+    //cada vez que se crea un pedido automaticamente aumenta el id y se guarda en el localStorage
     localStorage.setItem("pedidosId", Pedido.id);
   }
 }
@@ -29,7 +29,7 @@ let pedirBtn = document.querySelector("#pedirBtn");
 
 //Funcion principal para agregar items al contenedor y almacenarlos en el localStorage
 let agregarItems = () => {
-    
+
   //cada vez que cargamos un nuevo pedido borramos todo el contenido interno
   //para que no se pise la información o se repitan pedidos/ids 
   contenedorPedidos.innerHTML = "";
@@ -84,10 +84,10 @@ let agregarItems = () => {
         localStorage.setItem("pedidos", JSON.stringify(pedidos));
 
         Swal.fire({
-            title: `Pedido de ${pedido.nombre} rendido`,
-            text: 'pedido rendido exitosamente',
-            icon: 'success',
-            confirmButtonText: 'Ok'
+          title: `Pedido de ${pedido.nombre} rendido`,
+          text: 'pedido rendido exitosamente',
+          icon: 'success',
+          confirmButtonText: 'Ok'
         })
       });
 
@@ -108,22 +108,35 @@ let agregarItems = () => {
 
 //obtenemos los valores del formulario
 pedirBtn.addEventListener("click", () => {
-  let aux = {
-    nombre: document.getElementById("nombre").value,
-    direccion: document.getElementById("direccion").value,
-    telefono: document.getElementById("telefono").value,
+  let nombre = document.getElementById("nombre").value;
+  let direccion = document.getElementById("direccion").value;
+  let telefono = document.getElementById("telefono").value;
+  let pizzaCantidad = document.getElementById("pizza").value;
+  let hamburguesaCantidad = document.getElementById("hamburguesa").value;
 
-    pedido: [
-      {
-        //pizza
-        producto: "pizza",
-        cantidad: document.getElementById("pizza").value,
-      },
-      {
-        //hamburguesa
-        producto: "hamburguesa",
-        cantidad: document.getElementById("hamburguesa").value,
-      },
+  //verificamos si todos los campos estan llenos
+  if (!nombre || !direccion || !telefono || pizzaCantidad <= 0 || hamburguesaCantidad <= 0) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Por favor, completa todos los campos correctamente.',
+      icon: 'error',
+      confirmButtonText: 'Ok'
+    });
+    return;
+  }
+
+  let aux = {
+    nombre,
+    direccion,
+    telefono,
+    pedido: [{
+      producto: "pizza",
+      cantidad: pizzaCantidad
+    },
+    {
+      producto: "hamburguesa",
+      cantidad: hamburguesaCantidad
+    },
     ],
   };
 
@@ -137,11 +150,11 @@ pedirBtn.addEventListener("click", () => {
 
   //esto es para cuando se recargue la pagina no salte una alerta por cada
   //pedido ya cargado
-  if(pedidos.length > 0){
+  if (pedidos.length > 0) {
     Swal.fire({
-        title: 'Pedido cargado exitosamente',
-        icon: 'success',
-        confirmButtonText: 'Ok'
+      title: 'Pedido cargado exitosamente',
+      icon: 'success',
+      confirmButtonText: 'Ok'
     })
   }
 
