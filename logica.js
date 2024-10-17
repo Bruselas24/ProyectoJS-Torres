@@ -1,4 +1,10 @@
-
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+});
 /*
 Clase pedido mediante la cual se controla el ID y la información de cada producto
 */
@@ -9,75 +15,87 @@ class Pedido {
   static id = localStorage.getItem("pedidosId") ?? 0;
 
   constructor(pedido) {
-    (this.nombre = pedido.nombre),
-      (this.direccion = pedido.direccion),
-      (this.telefono = pedido.telefono),
-      (this.pedido = pedido.pedido),
-      (this.id = Pedido.id++);
+    this.nombre = pedido.nombre,
+      this.direccion = pedido.direccion,
+      this.telefono = pedido.telefono,
+      this.pedido = pedido.pedido,
+      this.id = Pedido.id++;
     //cada vez que se crea un pedido automaticamente aumenta el id y se guarda en el localStorage
     localStorage.setItem("pedidosId", Pedido.id);
   }
+
+  totalPedido() {
+    //Metodo que retorna el total de todos los productos pedidos
+    return this.pedido.reduce((total, actual) => {
+      return total + (actual.cantidad * actual.precio)
+    }, 0)
+  }
+
 }
 
 let containerProductos = document.getElementById('productos')
-let productos = [
-  {
-    nombre: 'Napolitana',
-    precio: 1500
-  },
-  {
-    nombre: 'Mozarrella',
-    precio: 2000
-  },
-  {
-    nombre: '4 Quesos',
-    precio: 2100
-  },
-  {
-    nombre: 'Huevo',
-    precio: 2300
-  },
-  {
-    nombre: 'Morron y Jamon',
-    precio: 2500
+let productos = []
+
+
+fetch('./data.JSON')
+ .then(response => {
+  if(!response.ok){
+    throw new Error('Error en la respuesta del servidor')
   }
-]
+  return response.json()
+ })
+ .then(data => {
+   productos = data
 
-productos.forEach((producto) => {
-  const nuevoProducto = document.createElement('div')
-  nuevoProducto.className = 'mb-3 input-group w-50'
-  nuevoProducto.innerHTML = `
-  <span class="col-4 input-group-text px-2 w-50">${producto.nombre}</span>
-  
-  <span class="input-group-btn">
-    <button class="btn btn-default" id="menos-${producto.nombre}" type="button">
-      -
-    </button>
-  </span>
+   if (productos.length <= 1) {
+     throw new Error('Hubo un problema al cargar los productos')
+   }
 
-  <input type="text" id="${producto.nombre.toLowerCase()}" class="form-control cantidad" />
-  <span class="input-group-btn">
-    <button class="btn btn-default" id="mas-${producto.nombre}" type="button">
-    +
-    </button>
-  </span>
-  `
+   productos.forEach((producto) => {
+    const nuevoProducto = document.createElement('div')
+    nuevoProducto.className = 'mb-3 input-group w-auto'
+    nuevoProducto.innerHTML = `
+    <span class="col-4 input-group-text px-2 w-50">${producto.nombre}</span>
+      
+    <span class="input-group-btn">
+      <button class="btn btn-default" id="menos-${producto.nombre}" type="button">
+        -
+      </button>
+    </span>
+    
+    <input type="text" id="${producto.nombre.toLowerCase()}" class="form-control cantidad" />
+      <span class="input-group-btn">
+        <button class="btn btn-default" id="mas-${producto.nombre}" type="button">
+        +
+        </button>
+      </span>
+    `
 
-  containerProductos.appendChild(nuevoProducto)
+    containerProductos.appendChild(nuevoProducto)
 
-  const menosBtn = document.getElementById(`menos-${producto.nombre}`)
-  const masBtn = document.getElementById(`mas-${producto.nombre}`)
-  const cantidad = document.getElementById(`${producto.nombre.toLowerCase()}`)
+    const menosBtn = document.getElementById(`menos-${producto.nombre}`)
+    const masBtn = document.getElementById(`mas-${producto.nombre}`)
+    const cantidad = document.getElementById(`${producto.nombre.toLowerCase()}`)
 
-  menosBtn.addEventListener('click', ()=> {
-    if(!(cantidad.value <= 0)){
-      cantidad.value--
-    }
+    menosBtn.addEventListener('click', () => {
+      if (!(cantidad.value <= 0)) {
+        cantidad.value--
+      }
+    })
+    masBtn.addEventListener('click', () => {
+      cantidad.value++
+    })
   })
-  masBtn.addEventListener('click', ()=> {
-    cantidad.value++
+}).catch(error => {
+  Swal.fire({
+    title: 'Ocurrio un error :(',
+      text: error,
+      icon: 'error',
+      confirmButtonText: 'Ok'
   })
 })
+
+
 
 
 //Recuperamos los pedidos ya cargados, caso contrario creamos un array vacio
@@ -97,9 +115,7 @@ let agregarItems = () => {
 
   //mediante un forEach vamos armando el HTML de cada pedido
   pedidos.forEach((pedido) => {
-
-    //console.log("cargando pedido ID", pedido.id);
-
+    pedido = new Pedido(pedido)
     //creamos el contenedor y le agregamos la clase y el id del pedido para
     //poder trabajarlos despues
     let nuevoItem = document.createElement("div");
@@ -120,8 +136,10 @@ let agregarItems = () => {
       <ul id='items-${pedido.id}'>
       </ul>
     </div>
-    <div class='card-footer text-end'>
-      <button class='btn btn-success' id='rendir-btn-${pedido.id}'>Rendir pedido</button>
+    <div class='card-footer text-end d-flex-block'>
+      <p>${pedido.totalPedido()} $</p>
+      <button class='btn btn-success mb-lg-2 mb-xxl-0' id='rendir-btn-${pedido.id}'>Rendir pedido</button>
+      <button class='btn btn-info'>Imprimir comanda</button>
     </div>
         `;
     //añadimos nuestro item en el contenedor
@@ -150,6 +168,11 @@ let agregarItems = () => {
           icon: 'success',
           confirmButtonText: 'Ok'
         })
+
+        if (!(contenedorPedidos.hasChildNodes())) {
+          contenedorPedidos.innerHTML = '<h4>No hay pedidos</h4>'
+        }
+
       });
 
     //añadimos cada uno de los productos y la cantidad en la que se pidio
@@ -163,10 +186,14 @@ let agregarItems = () => {
 
     });
   });
+
+  if (pedidos.length <= 0) {
+    contenedorPedidos.innerHTML = '<h4>No hay pedidos</h4>'
+  }
 };
 
 //obtenemos los valores del formulario
-pedirBtn.addEventListener("click", () => {
+pedirBtn.addEventListener("click", async () => {
   let nombre = document.getElementById("nombre").value;
   let direccion = document.getElementById("direccion").value;
   let telefono = document.getElementById("telefono").value;
@@ -183,15 +210,15 @@ pedirBtn.addEventListener("click", () => {
     });
     return;
   }
-  
+
   let cantidades = document.querySelectorAll('input.cantidad')
 
-  for(const elemento of cantidades){
-    if(elemento.value == 0 || elemento.value == ""){
+  for (const elemento of cantidades) {
+    if (elemento.value == 0 || elemento.value == "") {
       continue
     }
 
-    if(isNaN(Number(elemento.value))){
+    if (isNaN(Number(elemento.value))) {
       Swal.fire({
         title: 'Error',
         text: 'Ingrese una cantidad en numeros',
@@ -201,16 +228,27 @@ pedirBtn.addEventListener("click", () => {
       errorCarga = true
       break
     }
-    
+
     pedido.push({
       'pizzaNombre': elemento.id,
-      'cantidad': elemento.value
+      'cantidad': elemento.value,
+      'precio': productos.find((producto) => {
+        return producto.nombre.toLocaleLowerCase() == elemento.id
+      }).precio
     })
   }
 
-  if(errorCarga) return
+  if (errorCarga) return
 
-  console.log(pedido);
+  if (pedido.length <= 0) {
+    Swal.fire({
+      title: 'Error',
+      text: 'No pidio ningun producto',
+      icon: 'error',
+      confirmButtonText: 'Ok'
+    });
+    return
+  }
 
   let aux = {
     nombre,
@@ -218,6 +256,25 @@ pedirBtn.addEventListener("click", () => {
     telefono,
     pedido
   };
+
+  let resp = await Swal.fire({
+    title: '¿Desea confirmar el pedido?',
+    text: 'Se enviara a la direccion: ' + direccion,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Confirmar',
+    cancelButtonText: 'Cancelar'
+  })
+
+  if (!(resp.isConfirmed)) {
+    Swal.fire({
+      title: 'Se cancelo el pedido exitosamente',
+      icon: 'info',
+    })
+    return
+  }
 
   //añadimos el nuevo pedido al array y lo guardamos en el localStorage
   let nuevoPedido = new Pedido(aux);
@@ -227,15 +284,10 @@ pedirBtn.addEventListener("click", () => {
   //añadimos los items al HTML
   agregarItems();
 
-  //esto es para cuando se recargue la pagina no salte una alerta por cada
-  //pedido ya cargado
-  if (pedidos.length > 0) {
-    Swal.fire({
-      title: 'Pedido cargado exitosamente',
-      icon: 'success',
-      confirmButtonText: 'Ok'
-    })
-  }
+  Toast.fire({
+    icon: "success",
+    title: "Pedido cargado exitosamente"
+  });
 
 });
 

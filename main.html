@@ -16,18 +16,37 @@
 </head>
 
 <body class="bg-secondary bg-gradient">
-    <header class="container p-3">
-        <h1 class="text-center">Resto APP</h1>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light d-flex justify-content-evenly mb-5">
+            <a class="navbar-brand" href="#">PizzApp</a>
+            <div class="w-25">
+                <ul class="navbar-nav ml-auto d-flex justify-content-evenly">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Ventas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Proveedores</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
     </header>
     <div class="d-flex justify-content-center mb-3">
-        <div class="d-flex justify-content-around w-75">
-            <div class="card text-bg-primary border border rounded-3 w-25">
+        <div class="container row d-flex justify-content-around w-75">
+
+            <div class="card col-lg-4 col-md-12 text-bg-primary border border rounded-3 mb-3">
                 <h3 class="m-2 card-header">Pedidos</h3>
                 <div id="pedidos" class="card-body">
                 </div>
             </div>
 
-            <div class="card d-flex flex-column align-content w-50" style="height: min-content">
+            <div class="card col-lg-6 col-md-12 d-flex flex-column align-content " style="height: min-content">
                 <h3 class="m-2 card-header">Tomar Pedido</h3>
 
                 <div class="mx-2 card-body" id="pedirForm">
@@ -49,7 +68,7 @@
                     <div class="mb-3 input-group">
                         <label class="w-100">Productos</label>
                         <div id="productos" class="w-100">
-                            <div class="mb-3 input-group w-50">
+                            <div class="mb-3 input-group w-75">
                                 
                             </div>
                         </div>
