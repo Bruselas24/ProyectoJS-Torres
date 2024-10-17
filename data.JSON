@@ -1,0 +1,22 @@
+[
+    {
+      "nombre": "Napolitana",
+      "precio": 1500
+    },
+    {
+      "nombre": "Mozarrella",
+      "precio": 2000
+    },
+    {
+      "nombre": "4 Quesos",
+      "precio": 2100
+    },
+    {
+      "nombre": "Huevo",
+      "precio": 2300
+    },
+    {
+      "nombre": "Morron y Jamon",
+      "precio": 2500
+    }
+]
